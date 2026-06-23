@@ -1,7 +1,9 @@
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-export default function Linechartcomponent({statistics}){
-return(
+export default function Linechartcomponent({statistics , module}){
+  switch(module){
+    case "sale" :
+      return(
     <>
 <ResponsiveContainer width={(500)} height={300}>
         <LineChart data={statistics[11].map(item => ({ name: item[0], revenue: item[1]}))} className=" mt-6  ml-6">
@@ -11,17 +13,17 @@ return(
               const [, month, day] = date.split('-');
               return `${day}-${month}`;
             }}
-         
-            tick={{ fill: 'yellow' }}
+            interval={2}
+            tick={{ fill: '#8884d8' }}
           />
           <YAxis  tickFormatter={(value) => value === 0 ? '' : value}
-           tick={{ fill: 'yellow' }}/>
+           tick={{ fill: '#8884d8' }}/>
           <Legend />
           <Tooltip/>
           <Line 
             type="monotone" 
             dataKey="revenue" 
-            stroke="#8884d8" 
+            stroke="black" 
             strokeWidth={2}
             dot={{ r: 4 }}
             activeDot={{ r: 8 }}
@@ -30,4 +32,6 @@ return(
         </LineChart>
       </ResponsiveContainer>
 </>
-)}
+      )
+      
+    }}

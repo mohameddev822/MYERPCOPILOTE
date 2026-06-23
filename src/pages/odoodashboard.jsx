@@ -1,154 +1,147 @@
-import axios  from "axios";
+import axios from "axios";
 import { useEffect, useState } from "react";
 import Odooappselectiontext from "../sharedcomponents/odooappselectiontext";
-import Select from "../odoocomponents/sales/select";
-import Dashboard from "../odoocomponents/sales/dashboard";
-import background from "../assets/background.jpg" ; 
-export default function Odoodashboard() {
-    const [connectedtoOdoo , setConnectedtoOdoo] = useState(false) ;
-    const [data, setData] = useState([]) ;
-    const [selectedModule , setSelectedModule] = useState(null) ;
-    const db = "my-odoo-database" ; 
-    const email = "sanbimohamed095@gmail.com";
-    const password = "rabat2002chelsea" ; 
-    const uid = 2;
-
-     async function connect() {
-     const response = await axios.post(`/odoo/jsonrpc`, {
-        jsonrpc: '2.0',
-        method: 'call',
-        params: {
-            service: 'common',
-            method: 'login',
-            args: [db, email, password]
-        },
-        id: 1
-    });
-    if (response.data.result == 2) {
-        setConnectedtoOdoo(true) ;
-    }}
-
-    async function fetchaccountmove(){
-        
-   const accountmove = await axios.post('/odoo/jsonrpc', {
-      jsonrpc: '2.0',
-      method: 'call',
-      params: {
-        service: 'object',
-        method: 'execute_kw',
-        args: [
-          db, uid, password,
-          'account.move',
-          'search_read',
-      ]}
-    });
-setData(accountmove.data.result) ;
-}
-    async function fetchsaleorders() {
-        const models = await axios.post('/odoo/jsonrpc', {
-            jsonrpc: '2.0',
-            method: 'call',
-            params: {
-                service: 'object',
-                method: 'execute_kw',
-                args: [
-                    db, uid, password,
-                    'ir.model',
-                    'search_read',
-                    [[]], 
-                    {
-                        fields: ['id', 'model', 'name'],
-                        limit: 1000
-                    }
-        ]    }
-        });
-
-   const saleorders = await axios.post('/odoo/jsonrpc', {
-      jsonrpc: '2.0',
-      method: 'call',
-      params: {
-        service: 'object',
-        method: 'execute_kw',
-        args: [
-          db, uid, password,
-          'sale.order',
-          'search_read',
-          [[]], 
-          {  
-            fields: [
-              'id',
-              'name',
-              'amount_total',
-              'state',
-              'date_order',
-              'partner_id',
-              'user_id',
-              'team_id'
-            ],
-            limit: 1000
-          }
-        ]
-      }
-    });
-    setData(saleorders.data.result) ;
-    console.log(saleorders.data.result);
+import Select from "../odoocomponents/select";
+import Dashboard from "../odoocomponents/dashboard";
+import Keycloak from 'keycloak-js';
+import KcAdminClient from "@keycloak/keycloak-admin-client";
+import Tableofusers from "../sharedcomponents/tableusers";
+import Tableofinteractions from "../sharedcomponents/tableinteractions";
+export default function Odoodashboard({ connected , isAdmin }) {
+    const [connectedtoOdoo, setConnectedtoOdoo] = useState(false);
+    const [data, setData] = useState([]);
+    const [selectedModule, setSelectedModule] = useState(null);
+    const [viewers, setViewers] = useState([]);
     
-}
+    
 useEffect(() => {
-  async function fetchData() {
-    switch (selectedModule) {
-      case "sales":
-        await fetchsaleorders();
-        break;
-      case "accountmove":
-        await fetchaccountmove();
-        break;
-      default:
-        break;
+ async function getviewers() {
+    const response = await axios.get('/express/viewers');
+    (response.data);
+    setViewers(response.data);
+ }
+    getviewers();
+}, []);
+
+    async function connect() {
+        const response = await axios.get('/express/api/connect');
+        if (response.data) {
+            console.log('Connected to Odoo successfully');
+            console.log(response.data);
+            setConnectedtoOdoo(true);
+        }
     }
-  }
-  
-  fetchData();
-}, [selectedModule]);
 
-   return (
-<div style={{ backgroundImage: `url(${background})`, backgroundSize: "cover" }} >
 
-        {!connectedtoOdoo ? (
-            <>
-                
-                <div className="h-screen flex flex-col justify-center items-center gap-4">
-                    <h1 className="text-5xl font-bold text-amber-300">Odoo Dashboard</h1>
-                    <p className="text-xl text-white">Welcome to the Odoo Dashboard! Here you can manage your Odoo ERP system and access various features and modules.</p>
-                    <button onClick={connect} className="bg-red-900 text-white text-xl font-bold hover:bg-red-700 px-8 py-4 rounded-full">
-                        Explore Odoo
-                    </button>
-                </div>
-            </>
-        ) : (
-         <>
-    {selectedModule === null ? (
-        <>
-          <div 
-            className="h-screen w-full overflow-auto flex flex-col"
-        >
+    async function fetchaccountmove() {
+        const accountmove = await axios.get('/express/api/fetchaccounting');
+        setData(accountmove.data);
+    }
+
+    async function fetchsaleorders() {
+        const saleorders = await axios.get('/express/api/fetchsaleorders');
+        console.log("saleorders" , saleorders.data.result);
+        setData(saleorders.data);
+    }
+            
+
+
+    async function fetchcrmleads() {
+         const crmleads = await axios.get('/express/api/fetchcrmleads')         
+         setData(crmleads.data);
+    }
+    async function fetchproduct(){
+        const products = await axios.get('/express/api/fetchproduct') 
+        setData(products.data);
+}
+
+   
+
+    useEffect(() => {
+        async function connecttoodoo() {
+        await connect();
+        }
+        connecttoodoo();
+    }, []);
+
+    useEffect(() => {
+        async function fetchData() {
+            switch (selectedModule) {
+                case "sale":
+                    await fetchsaleorders();
+                    break;
+                case "account":
+                    await fetchaccountmove();
+                    break;
+                case "crm":
+                    await fetchcrmleads();
+                    break;
+                case "product":
+                    await fetchproduct();
+                    break;
+                default:
+                    break;
+            }
+        }
+        fetchData();
         
-                    <Odooappselectiontext />
-        <div className="grid grid-cols-7 gap-y-4 ">
-            <Select onClick={() => setSelectedModule("sales")} title="Sales" />
-            <Select onClick={() => setSelectedModule("accountmove")} title="Accounting" />
-       </div>
-       </div>
-        </>
-    ) : (
-        <>
-                {selectedModule === "sales" && <Dashboard data={data} module="sale.order" />}
-                {selectedModule === "accountmove" && <Dashboard data={data} module="account.move" />}
-                
+    }, [selectedModule]);
 
-        </>
-    )}
-</>
-        )}
+    useEffect(() => {
+}, [data]);
+    return (
+        <div className="w-full min-h-screen">
+            {connectedtoOdoo && connected && !isAdmin ? (
+                <div className="w-full">
+                    {selectedModule === null ? (
+                        <div className="w-full">
+                            <div className="text-center py-8">
+                                <h1 className="text-5xl font-bold text-white">Odoo Dashboard</h1>
+                                <p className="text-xl font-bold mt-15">
+                                    Welcome to the Odoo Dashboard! Here you can manage your Odoo ERP 
+                                    system and access various features and modules.
+                                </p>
+                            </div>
+                            <Odooappselectiontext />
+                            <div className="grid grid-cols-7 gap-4 p-8">
+                                <Select onClick={() => setSelectedModule("sale")} title="Sales" />
+                                <Select onClick={() => setSelectedModule("account")} title="Accounting" />
+                                <Select onClick={() => setSelectedModule("crm")} title="CRM" />
+                                <Select onClick={() => setSelectedModule("product")} title="Product" />
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            {selectedModule === "sale" && <Dashboard data={data} module="sale" />}
+                            {selectedModule === "account" && <Dashboard data={data} module="account" />}
+                            {selectedModule === "crm" && <Dashboard data={data} module="crm" />}
+                            {selectedModule === "product" && <Dashboard data={data} module="product" />}
+                        </>
+                    )}
+                </div>
+            ) : connectedtoOdoo && connected && isAdmin  ? (
+               <div className="w-full">
+    <div className="text-center py-8">
+        <h1 className="text-5xl font-bold text-white">Admin Dashboard</h1>
+            <p className="text-xl font-bold mt-15">
+            Welcome to your central command center! From here, you can monitor activity, manage users, 
+            track key metrics, and configure system settings to keep everything running smoothly.
+        </p>
+        <div className="w-full p-4"> 
+            <div className="bg-red-200">
+                <Tableofusers viewers={viewers} />
+            </div>
+            <div className="bg-red-200 mt-10">
+                <Tableofinteractions />
+            </div>
+        </div>
     </div>
-)}
+</div>
+            ) : !connectedtoOdoo ? (
+                                <div>Not Connected to Odoo</div>
+            ): null}
+        </div>
+    );
+}
+  
+

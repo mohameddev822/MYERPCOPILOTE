@@ -43,23 +43,67 @@ export function gettotalofcondition(data, field,conditionfield ,  value) {
   return total;
 }
 
-export function gettotalnumberofcondition (data, conditionfield ,  value) {
-  if (!Array.isArray(data)) return 0;
-  let elements = [] ; 
-  data.forEach(element => {
-    if ( element[conditionfield] && element[conditionfield] === value ) {
-       elements.push(element);
+export function gettotalnumberofcondition(data, conditionfield, value, sign) {
+    if (!Array.isArray(data)) return 0;
+    let elements = [];
+    let elements2 = [];
+    
+    data.forEach(element => {
+        const fieldValue = element[conditionfield];
+        
+        switch (sign) {
+            case '>':
+                if (fieldValue > value) elements.push(element);
+                break;
+            case '<':
+                if (fieldValue < value) elements.push(element);
+                break;
+            case '>=':
+                if (fieldValue >= value) elements.push(element);
+                break;
+            case '<=':
+                if (fieldValue <= value) elements.push(element);
+                break;
+            case '!=':
+                if (fieldValue != value) elements.push(element);
+                break;
+            case '=':
+                switch(typeof value) {
+                    case 'number':
+                        if (fieldValue == value) elements.push(element);
+                        break;
+                    case 'boolean':
+                        if (fieldValue === true) {
+                            elements.push(element);
+                        } else if (fieldValue === false) {
+                            elements2.push(element);
+                        }
+                        break;
+                    case 'string':
+                        if (fieldValue == value) elements.push(element);
+                        break;
+                }
+                break; 
+            default:
+                if (fieldValue === value) elements.push(element);
+                break;
+        }
+    });    
+    if (value === true) return elements.length;
+    if (value === false) return elements2.length;
+    let total = 0 ;
+    if(typeof value == 'number'){
+      elements.map(element=> {
+        total += element[conditionfield];
+      })
+      return total;
     }
-  });
-  
-  return elements.length;
+    return elements.length;
 }
-
   
 
   export function gettotalof(data, field) {
     if (!Array.isArray(data)) return 0;
-
     return data.reduce((total, element) => {
         return total + (element[field] || 0);
     }, 0);
@@ -70,7 +114,6 @@ function getbyperson(data ,id, person , field , condition  , value){
     
 const result = gettotalofcondition(data.filter(element => element[id][1] === person) , field , condition ,value);
 
-console.group(result)
    return result;
 }
 
@@ -82,9 +125,7 @@ console.group(result)
     if (!Array.isArray(data)) return [];
       const Mapmap =new Map();
     const persons = getall(data , id).elements;
-    console.log(persons) 
     for(const person of persons){
-        console.log(person)
     Mapmap.set(person , getbyperson(data , id , person , field , condition , value));
     }      
     
@@ -103,9 +144,7 @@ export function average(data , firstfield , secondfield) {
     if (!Array.isArray(data)) return 0;
 
     const firsttotal = typeof(firstfield) === 'string' ? gettotalof(data , firstfield) : firstfield;
-   console.log(firsttotal)
     const secondtotal = typeof(secondfield) === 'string' ? gettotalnumberof(data , secondfield) : secondfield
-    console.log(secondtotal)
     const average = firsttotal / secondtotal;
     return average;
   }
@@ -125,8 +164,13 @@ export function average(data , firstfield , secondfield) {
       xaxisValue = xaxisValue[0];
     }
 
-    if (typeof xaxisValue === 'string' && xaxisValue.includes(' ')) {
+    if (typeof xaxisValue === 'string' && xaxisValue.includes(' ') ) {
       xaxisValue = xaxisValue.split(' ')[0];
+    }
+    const date = new Date(xaxisValue);
+    const month = date.getMonth();
+    if (month !== 2 && month !== 3) {
+      return; 
     }
 
     let yaxisValue = item[yaxis];

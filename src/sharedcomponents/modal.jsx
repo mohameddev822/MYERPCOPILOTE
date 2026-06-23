@@ -4,8 +4,8 @@ import Chatmessagecontainer from "./chatmessage";
 import { useState } from "react";
 import axios from "axios";
 import { useEffect, useRef  } from "react";
-
-export default function ModalWidget ({open , onClose , className , data }){
+import { useKeycloak } from "@react-keycloak/web";
+export default function ModalWidget ({open , onClose , className , data , module }){
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null); 
@@ -14,13 +14,22 @@ export default function ModalWidget ({open , onClose , className , data }){
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
+
+  const { keycloak} = useKeycloak();
+    
+      const firstName = keycloak.tokenParsed?.given_name;
+      const lastName = keycloak.tokenParsed?.family_name;
+    (firstName)
   
   async function getGroqResponse(userMessage){
     setIsLoading(true);
     try {
       const response = await axios.post('/express/api/chat', {
+        firstName: firstName,
+        lastName: lastName,
         message: userMessage.content,
-        data : data
+        data: data,
+        module: module
       });
       
       const chatbotMessage = {
@@ -57,13 +66,14 @@ export default function ModalWidget ({open , onClose , className , data }){
       setIsLoading(false);
     }
   }, [open]);
-  
-  return (
+  switch(module){
+    case 'sale':
+      return (
     <div>
       <Modal open={open} onClose={onClose} className={className}>
-        <div className="bg-white rounded-lg w-[600px] shadow-xl flex flex-col h-[300px]">
-          <div className="p-4 border-b border-blue-900">
-            <h2 className="text-2xl font-bold text-blue-900">Sales Chatbot</h2>
+        <div className="bg-white rounded-lg w-[1000px] shadow-xl flex flex-col h-[600px]">
+          <div className="p-4 border-b border-red-400">
+            <h2 className="text-2xl font-bold text-red-400">Sales Chatbot</h2>
           </div>
           
           <div className="overflow-y-auto flex-1 min-h-[200px]">
@@ -72,10 +82,72 @@ export default function ModalWidget ({open , onClose , className , data }){
           </div>
           
           <div className="bg-white p-4 border-t border-gray-200">
-            <Chatinput onsend={handleSendMessage} isLoading={isLoading} />
+            <Chatinput onsend={handleSendMessage} isLoading={isLoading}  />
           </div>
         </div>
       </Modal>
     </div>
   );
-}
+  case 'product':
+  return (
+    <div>
+      <Modal open={open} onClose={onClose} className={className}>
+        <div className="bg-white rounded-lg w-[1000px] shadow-xl flex flex-col h-[600px]">
+          <div className="p-4 border-b border-red-400">
+            <h2 className="text-2xl font-bold text-red-400">Product Chatbot</h2>
+          </div>
+          
+          <div className="overflow-y-auto flex-1 min-h-[200px]">
+            <Chatmessagecontainer messages={messages} />
+            <div ref={messagesEndRef} /> 
+          </div>
+          
+          <div className="bg-white p-4 border-t border-gray-200">
+            <Chatinput onsend={handleSendMessage} isLoading={isLoading}  />
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+  case 'crm' :
+  return (
+    <div>
+      <Modal open={open} onClose={onClose} className={className}>
+        <div className="bg-white rounded-lg w-[1000px] shadow-xl flex flex-col h-[600px]">
+          <div className="p-4 border-b border-red-400">
+            <h2 className="text-2xl font-bold text-red-400">CRM Chatbot</h2>
+          </div>
+          
+          <div className="overflow-y-auto flex-1 min-h-[200px]">
+            <Chatmessagecontainer messages={messages} />
+            <div ref={messagesEndRef} /> 
+          </div>
+          
+          <div className="bg-white p-4 border-t border-gray-200">
+            <Chatinput onsend={handleSendMessage} isLoading={isLoading}  />
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+  case 'account':
+  return (
+    <div>
+      <Modal open={open} onClose={onClose} className={className}>
+        <div className="bg-white rounded-lg w-[1000px] shadow-xl flex flex-col h-[600px]">
+          <div className="p-4 border-b border-red-400">
+            <h2 className="text-2xl font-bold text-red-400">Accounting Chatbot</h2>
+          </div>
+  <div className="overflow-y-auto flex-1 min-h-[200px]">
+            <Chatmessagecontainer messages={messages} />
+            <div ref={messagesEndRef} /> 
+          </div>
+          
+          <div className="bg-white p-4 border-t border-gray-200">
+            <Chatinput onsend={handleSendMessage} isLoading={isLoading}  />
+          </div>
+        </div>
+      </Modal>
+    </div>
+   );
+}}

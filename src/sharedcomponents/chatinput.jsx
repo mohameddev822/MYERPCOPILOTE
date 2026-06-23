@@ -27,12 +27,12 @@ export default function Chatinput({onsend, isLoading = false}){
           onKeyPress={handleKeyPress}
           placeholder={isLoading ? "Bot is typing..." : "Type your message here..."}
           disabled={isLoading}
-          className="flex-1 px-4 py-2 rounded-lg bg-gray-100 border border-gray-300 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+          className="flex-1 px-4 py-2 rounded-lg bg-white border border-red-300 focus:outline-none disabled:opacity-50 text-black"
         />
         <Chatbotpoint 
           onClick={handleSend} 
           size="small" 
-          color="primary" 
+          color="error" 
           ariaLabel="send" 
           type="send" 
           className="ml-6"
