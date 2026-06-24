@@ -14,7 +14,8 @@ Get GROQ API key from : https://console.groq.com/keys , go to .env and assign th
 
 IF you want to use your own odoo database assign your database name , email and password to the .env variables : db , email , password .
 
-Viewer e-mail and password : user@gmail.com , devoteam123 
+Viewer e-mail and password : user@gmail.com , devoteam123
+
 Admin e-mail and password : mohameddevoteam@gmail.com , devoteam123
 
 To execute the project : 
