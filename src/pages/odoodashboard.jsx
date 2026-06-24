@@ -17,7 +17,6 @@ export default function Odoodashboard({ connected , isAdmin }) {
 useEffect(() => {
  async function getviewers() {
     const response = await axios.get('/express/viewers');
-    (response.data);
     setViewers(response.data);
  }
     getviewers();
@@ -26,8 +25,6 @@ useEffect(() => {
     async function connect() {
         const response = await axios.get('/express/api/connect');
         if (response.data) {
-            console.log('Connected to Odoo successfully');
-            console.log(response.data);
             setConnectedtoOdoo(true);
         }
     }
