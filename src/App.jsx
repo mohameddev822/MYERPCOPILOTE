@@ -19,7 +19,6 @@ function AppContent() {
 const [isadmin, setIsAdmin] = useState(false);
 
 const userid = keycloak?.tokenParsed?.sub;
-("User ID:", userid);
 const userrole =keycloak.tokenParsed?.role;
 useEffect(() => {
   async function assignrole(){
