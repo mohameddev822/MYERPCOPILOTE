@@ -262,8 +262,7 @@ app.get('/api/connect', async (req, res) => {
           
             id: 1
         });
-        console.log(response.data.result);
-          console.log(response.data);
+      
         
           if (response.data.result == 2) {
             console.log('Connected to Odoo successfully');
@@ -478,10 +477,10 @@ app.post('/api/chat', async (req, res) => {
 };
 
     const sqlQuery = await generateSQLQuery(message, tableSchema);
-    ('SQL Query:', sqlQuery);
+    
     (sqlQuery);
     const sqlResult = await executeSQLWithFallback(sqlQuery);
-    ('SQL Result:', sqlResult);
+    
     
     const response = await generateResponseWithGroq(message, sqlQuery, sqlResult);
     
