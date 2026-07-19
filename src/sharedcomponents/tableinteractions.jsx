@@ -122,8 +122,9 @@ export default function Tableinteractions() {
     </div>
   )}  
                 </div>
+    <div className="overflow-x-auto">
 
-                <table className="min-w-full border-collapse border border-black">
+                <table className="min-w-full border-collapse border border-black ">
                     <thead className="bg-white">
                         <tr className="border-b border-black">
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-black">
@@ -281,6 +282,7 @@ export default function Tableinteractions() {
                         )}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     );
